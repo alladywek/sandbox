@@ -33,6 +33,6 @@ class QSort {
     }
 
     private fun getPivot(arr: MutableList<Int>, lo: Int, hi: Int): Int {
-        return ((arr[lo] + arr[hi]) * 0.5).toInt()
+        return arr[lo].div(2) + arr[hi].div(2)
     }
 }
