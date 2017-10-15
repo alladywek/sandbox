@@ -1,23 +1,23 @@
 package org.alladywek.rpn
 
-import java.util.regex.Pattern
-
 class ReversePolishNotation {
 
     companion object {
 
-        private val pattern: Pattern = Pattern.compile("\\s+")
+        private val regex: Regex = Regex("\\s+")
 
         @JvmStatic
-        fun from(statement: String): String {
+        fun from(expression: String): String {
+            if (expression.isBlank()) {
+                return ""
+            }
             val signs = arrayListOf<Sign>()
-            val splitStatement = statement.split(pattern)
-            splitStatement.forEach {
+            expression.split(regex).filter(String::isNotBlank).forEach {
                 when {
                     it == "+" -> signs.add(Plus())
                     it == "-" -> signs.add(Minus())
                     it.toDoubleOrNull() != null -> signs.add(Number(it.toDouble()))
-                    else -> throw IllegalArgumentException("Unexpected sign: $it")
+                    else -> throw IllegalArgumentException("Unexpected sign [$it] in expression [$expression]")
                 }
             }
             return buildRPN(signs)
