@@ -16,6 +16,8 @@ class ReversePolishNotation {
                 when {
                     it == "+" -> signs.add(Plus())
                     it == "-" -> signs.add(Minus())
+                    it == "*" -> signs.add(Multiply())
+                    it == "/" -> signs.add(Divide())
                     it.toDoubleOrNull() != null -> signs.add(Number(it.toDouble()))
                     else -> throw IllegalArgumentException("Unexpected sign [$it] in expression [$expression]")
                 }
@@ -25,25 +27,32 @@ class ReversePolishNotation {
 
         private fun buildRPN(signs: ArrayList<Sign>): String {
             val result = arrayListOf<Sign>()
-            val stack = arrayListOf<Sign>()
+            val stack = arrayListOf<Operation>()
             signs.forEach {
                 when (it) {
                     is Number -> result.add(it)
-                    is Plus -> stack.add(it)
-                    is Minus -> stack.add(it)
+                    is Operation -> distributionOperation(result, stack, it)
                 }
             }
-            result.addAll(stack)
+            result.addAll(stack.reversed())
             return result.joinToString(" ")
+        }
+
+        private fun distributionOperation(result: ArrayList<Sign>, stack: ArrayList<Operation>, operation: Operation) {
+            while (stack.isNotEmpty() && stack.last().priority >= operation.priority) {
+                result.add(stack.removeAt(stack.lastIndex))
+            }
+            stack.add(operation)
         }
     }
 }
 
 sealed class Sign
 
-class Plus : Sign() {
+open class Operation(val priority: Int) : Sign()
 
-    val priority = 1
+class Plus : Operation(1) {
+
     val operation: (Double, Double) -> Double = { a: Double, b: Double -> a + b }
 
     override fun toString(): String {
@@ -51,13 +60,30 @@ class Plus : Sign() {
     }
 }
 
-class Minus : Sign() {
+class Minus : Operation(1) {
 
-    val priority = 1
     val operation: (Double, Double) -> Double = { a: Double, b: Double -> a + b }
 
     override fun toString(): String {
         return "-"
+    }
+}
+
+class Divide : Operation(2) {
+
+    val operation: (Double, Double) -> Double = { a: Double, b: Double -> a / b }
+
+    override fun toString(): String {
+        return "/"
+    }
+}
+
+class Multiply : Operation(2) {
+
+    val operation: (Double, Double) -> Double = { a: Double, b: Double -> a * b }
+
+    override fun toString(): String {
+        return "*"
     }
 }
 

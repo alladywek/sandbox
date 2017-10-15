@@ -18,7 +18,25 @@ class ReversePolishNotationTest : FunSpec() {
             ReversePolishNotation.from("    ") shouldBe ""
         }
 
-        test("ReversePolishNotation.from() should return RPN from expression") {
+        test("ReversePolishNotation.from() throws IllegalArgumentException with message if expression has illegal sign") {
+            val testData = table(
+                    headers("expression", "message"),
+                    row("1 + 2a", "Unexpected sign [2a] in expression [1 + 2a]"),
+                    row("x", "Unexpected sign [x] in expression [x]"),
+                    row("abc + 1", "Unexpected sign [abc] in expression [abc + 1]"),
+                    row("abc * 1", "Unexpected sign [abc] in expression [abc * 1]"),
+                    row("1 / #", "Unexpected sign [#] in expression [1 / #]"),
+                    row("abc + 1 - qwerty", "Unexpected sign [abc] in expression [abc + 1 - qwerty]")
+            )
+            forAll(testData) { expression, message ->
+                val exception = shouldThrow<IllegalArgumentException> {
+                    ReversePolishNotation.from(expression)
+                }
+                exception.message shouldBe message
+            }
+        }
+
+        test("ReversePolishNotation.from() should return RPN for expression with addition and division") {
             val testData = table(
                     headers("expression", "result"),
                     row("1 + 2", "1 2 +"),
@@ -36,19 +54,29 @@ class ReversePolishNotationTest : FunSpec() {
             }
         }
 
-        test("ReversePolishNotation.from() throws IllegalArgumentException with message if expression has illegal sign") {
+        test("ReversePolishNotation.from() should return RPN from expression with multiplication and division") {
             val testData = table(
-                    headers("expression", "message"),
-                    row("1 + 2a", "Unexpected sign [2a] in expression [1 + 2a]"),
-                    row("x", "Unexpected sign [x] in expression [x]"),
-                    row("abc + 1", "Unexpected sign [abc] in expression [abc + 1]"),
-                    row("abc + 1 - qwerty", "Unexpected sign [abc] in expression [abc + 1 - qwerty]")
+                    headers("expression", "result"),
+                    row("1 * 2", "1 2 *"),
+                    row("1 / 2", "1 2 /"),
+                    row("1.0 * 2.55", "1 2.55 *"),
+                    row("0.99 / 2", "0.99 2 /")
             )
-            forAll(testData) { expression, message ->
-                val exception = shouldThrow<IllegalArgumentException> {
-                    ReversePolishNotation.from(expression)
-                }
-                exception.message shouldBe message
+            forAll(testData) { expression, result ->
+                ReversePolishNotation.from(expression) shouldEqual result
+            }
+        }
+
+        test("ReversePolishNotation.from() should return RPN for complex expression") {
+            val testData = table(
+                    headers("expression", "result"),
+                    row("1 * 2 + 2.2", "1 2 * 2.2 +"),
+                    row("1 / 2 - 5", "1 2 / 5 -"),
+                    row("4 - 1.0 * 2.55", "4 1 2.55 * -"),
+                    row("1 + 0.99 / 2", "1 0.99 2 / +")
+            )
+            forAll(testData) { expression, result ->
+                ReversePolishNotation.from(expression) shouldEqual result
             }
         }
     }
