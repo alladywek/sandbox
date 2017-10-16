@@ -20,6 +20,7 @@ class ReversePolishNotation {
                     it == "/" -> signs.add(Divide())
                     it == "(" -> signs.add(OpenBracket())
                     it == ")" -> signs.add(CloseBracket())
+                    it == "^" -> signs.add(Power())
                     it.toDoubleOrNull() != null -> signs.add(Number(it.toDouble()))
                     else -> throw IllegalArgumentException("Unexpected sign [$it] in expression [$expression]")
                 }
@@ -72,6 +73,36 @@ sealed class Sign
 
 open class Operation(val priority: Int) : Sign()
 
+class OpenBracket : Operation(0) {
+
+    override fun equals(other: Any?): Boolean {
+        return other is OpenBracket
+    }
+
+    override fun toString(): String {
+        return "("
+    }
+
+    override fun hashCode(): Int {
+        return 1
+    }
+}
+
+class CloseBracket : Operation(0) {
+
+    override fun equals(other: Any?): Boolean {
+        return other is CloseBracket
+    }
+
+    override fun toString(): String {
+        return ")"
+    }
+
+    override fun hashCode(): Int {
+        return 2
+    }
+}
+
 class Plus : Operation(1) {
 
     val operation: (Double, Double) -> Double = { a: Double, b: Double -> a + b }
@@ -108,33 +139,12 @@ class Multiply : Operation(2) {
     }
 }
 
-class OpenBracket : Operation(0) {
+class Power : Operation(3) {
 
-    override fun equals(other: Any?): Boolean {
-        return other is OpenBracket
-    }
+    val operation: (Double, Double) -> Double = { a: Double, b: Double -> Math.pow(a, b) }
 
     override fun toString(): String {
-        return "("
-    }
-
-    override fun hashCode(): Int {
-        return 1
-    }
-}
-
-class CloseBracket : Operation(0) {
-
-    override fun equals(other: Any?): Boolean {
-        return other is CloseBracket
-    }
-
-    override fun toString(): String {
-        return ")"
-    }
-
-    override fun hashCode(): Int {
-        return 2
+        return "^"
     }
 }
 

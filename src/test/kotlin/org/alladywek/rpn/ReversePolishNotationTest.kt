@@ -77,7 +77,11 @@ class ReversePolishNotationTest : FunSpec() {
                     row("1 + 0.99 / 2", "1 0.99 2 / +"),
                     row("( 1 + 0.99 ) / 2 + 0.8", "1 0.99 + 2 / 0.8 +"),
                     row("( 1 + 0.99 ) / ( 2 - 0.8 )", "1 0.99 + 2 0.8 - /"),
-                    row("1 + 0.99 / 2", "1 0.99 2 / +")
+                    row("1 + 0.99 / 2", "1 0.99 2 / +"),
+                    row("( 2 ^ 2 )", "2 2 ^"),
+                    row("( 1 / 2 ) ^ 5", "1 2 / 5 ^"),
+                    row("4 ^ 1.0  * 2.55", "4 1 ^ 2.55 *"),
+                    row("1 ^ ( 2 - 5 )", "1 2 5 - ^")
             )
             forAll(testData) { expression, result ->
                 ReversePolishNotation.from(expression) shouldEqual result
@@ -112,6 +116,10 @@ class ReversePolishNotationTest : FunSpec() {
             forAll(testData) { expression, result ->
                 ReversePolishNotation.from(expression) shouldEqual result
             }
+        }
+
+        test("ReversePolishNotation.from() should return RPN for the expression with exponentiation") {
+            ReversePolishNotation.from("2 ^ 2") shouldEqual "2 2 ^"
         }
     }
 }
