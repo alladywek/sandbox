@@ -75,7 +75,7 @@ class Power : Operation(3) {
     }
 }
 
-data class Number(private val value: Double) : Sign() {
+data class Number(val value: Double) : Sign() {
     override fun toString(): String {
         return if (value.toString().endsWith(".0")) value.toLong().toString() else value.toString()
     }
@@ -140,5 +140,8 @@ private fun validateFinalStack(stack: List<Sign>) {
 }
 
 private fun List<Sign>.calculatePostfix(): Double {
+    if (size == 1) {
+        return (first() as Number).value
+    }
     return 0.0
 }

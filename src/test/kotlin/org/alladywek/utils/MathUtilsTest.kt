@@ -9,6 +9,7 @@ import io.kotlintest.properties.headers
 import io.kotlintest.properties.row
 import io.kotlintest.properties.table
 import io.kotlintest.specs.FeatureSpec
+import org.junit.Assert.assertTrue
 import org.junit.runner.RunWith
 
 @RunWith(KTestJUnitRunner::class)
@@ -134,6 +135,20 @@ class MathUtilsTest : FeatureSpec() {
                 MathUtils.calculateInfixExpression("").isNaN() shouldBe true
                 MathUtils.calculateInfixExpression(" ").isNaN() shouldBe true
                 MathUtils.calculateInfixExpression("    ").isNaN() shouldBe true
+            }
+
+            scenario("should return if expression contains just one number") {
+                val testData = table (
+                    headers("expression", "result"),
+                    row("0.0", 0.0),
+                    row("0", 0.0),
+                    row("1.1", 1.1),
+                    row("-1.1", -1.1),
+                    row("1", 1.0)
+                )
+                forAll(testData) { expression, result ->
+                    assertTrue(MathUtils.calculateInfixExpression(expression).compareTo(result) == 0)
+                }
             }
         }
     }
