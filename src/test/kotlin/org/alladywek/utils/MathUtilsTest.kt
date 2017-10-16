@@ -105,7 +105,7 @@ class MathUtilsTest : FunSpec() {
             }
         }
 
-        test("MathUtils.fromInfixToPostfixNotation() should return postfix notation with parentheses") {
+        test("MathUtils.fromInfixToPostfixNotation() should return postfix notation considering parentheses") {
             val testData = table(
                     headers("expression", "result"),
                     row("( 2 + 2.2 )", "2 2.2 +"),

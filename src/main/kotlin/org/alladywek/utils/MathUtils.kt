@@ -18,19 +18,9 @@ sealed class Sign
 
 open class Operation(val priority: Int) : Sign()
 
-class OpenBracket : Operation(0) {
+class OpeningParenthesis : Operation(0)
 
-    override fun toString(): String {
-        return "("
-    }
-}
-
-class CloseBracket : Operation(0) {
-
-    override fun toString(): String {
-        return ")"
-    }
-}
+class ClosingParenthesis : Operation(0)
 
 class Plus : Operation(1) {
 
@@ -90,8 +80,8 @@ private fun String.toSigns(): List<Sign> {
             it == "-" -> Minus()
             it == "*" -> Multiply()
             it == "/" -> Divide()
-            it == "(" -> OpenBracket()
-            it == ")" -> CloseBracket()
+            it == "(" -> OpeningParenthesis()
+            it == ")" -> ClosingParenthesis()
             it == "^" -> Power()
             it.toDoubleOrNull() != null -> Number(it.toDouble())
             else -> throw IllegalArgumentException("Unexpected sign [$it] in expression [$this]")
@@ -105,8 +95,8 @@ private fun List<Sign>.toPostfixNotation(): List<Sign> {
     this.forEach {
         when (it) {
             is Number -> result.add(it)
-            is OpenBracket -> stack.add(it)
-            is CloseBracket -> processCloseBracket(result, stack)
+            is OpeningParenthesis -> stack.add(it)
+            is ClosingParenthesis -> processCloseBracket(result, stack)
             is Operation -> processOperation(result, stack, it)
         }
     }
@@ -119,10 +109,10 @@ private fun List<Sign>.buildString(): String {
 }
 
 private fun processCloseBracket(result: ArrayList<Sign>, stack: ArrayList<Operation>) {
-    if (stack.isNotEmpty() && stack.any { it is OpenBracket }) {
+    if (stack.isNotEmpty() && stack.any { it is OpeningParenthesis }) {
         while (true) {
             val stackElement = stack.removeAt(stack.lastIndex)
-            if (stackElement is OpenBracket) return else result.add(stackElement)
+            if (stackElement is OpeningParenthesis) return else result.add(stackElement)
         }
     }
     throw IllegalArgumentException("The expression contains inconsistent parentheses")
@@ -136,7 +126,7 @@ private fun processOperation(result: ArrayList<Sign>, stack: ArrayList<Operation
 }
 
 private fun validateFinalStack(stack: List<Sign>) {
-    if (stack.any { it is OpenBracket }) {
+    if (stack.any { it is OpeningParenthesis }) {
         throw IllegalArgumentException("The expression contains inconsistent parentheses")
     }
 }
