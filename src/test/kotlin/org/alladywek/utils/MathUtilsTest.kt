@@ -1,4 +1,4 @@
-package org.alladywek.rpn
+package org.alladywek.utils
 
 import io.kotlintest.matchers.shouldBe
 import io.kotlintest.matchers.shouldEqual
@@ -9,16 +9,16 @@ import io.kotlintest.properties.row
 import io.kotlintest.properties.table
 import io.kotlintest.specs.FunSpec
 
-class ReversePolishNotationTest : FunSpec() {
+class MathUtilsTest : FunSpec() {
 
     init {
 
-        test("ReversePolishNotation.from() should return empty string if the expression is blank") {
-            ReversePolishNotation.from("") shouldBe ""
-            ReversePolishNotation.from("    ") shouldBe ""
+        test("MathUtils.fromInfixToPostfixNotation() should return empty string if the expression is blank") {
+            MathUtils.fromInfixToPostfixNotation("") shouldBe ""
+            MathUtils.fromInfixToPostfixNotation("    ") shouldBe ""
         }
 
-        test("ReversePolishNotation.from() throws IllegalArgumentException with message if the expression has illegal sign") {
+        test("MathUtils.fromInfixToPostfixNotation() throws IllegalArgumentException with message if the expression has illegal sign") {
             val testData = table(
                     headers("expression", "message"),
                     row("1 + 2a", "Unexpected sign [2a] in expression [1 + 2a]"),
@@ -30,13 +30,13 @@ class ReversePolishNotationTest : FunSpec() {
             )
             forAll(testData) { expression, message ->
                 val exception = shouldThrow<IllegalArgumentException> {
-                    ReversePolishNotation.from(expression)
+                    MathUtils.fromInfixToPostfixNotation(expression)
                 }
                 exception.message shouldBe message
             }
         }
 
-        test("ReversePolishNotation.from() should return RPN for the expression with addition and division") {
+        test("MathUtils.fromInfixToPostfixNotation() should return postfix notation with '+' and '-' operations") {
             val testData = table(
                     headers("expression", "result"),
                     row("1 + 2", "1 2 +"),
@@ -50,11 +50,11 @@ class ReversePolishNotationTest : FunSpec() {
                     row("   1    -   2      ", "1 2 -")
             )
             forAll(testData) { expression, result ->
-                ReversePolishNotation.from(expression) shouldEqual result
+                MathUtils.fromInfixToPostfixNotation(expression) shouldEqual result
             }
         }
 
-        test("ReversePolishNotation.from() should return RPN from the expression with multiplication and division") {
+        test("MathUtils.fromInfixToPostfixNotation() should return postfix notation with '*' and '/' operations") {
             val testData = table(
                     headers("expression", "result"),
                     row("1 * 2", "1 2 *"),
@@ -63,11 +63,11 @@ class ReversePolishNotationTest : FunSpec() {
                     row("0.99 / 2", "0.99 2 /")
             )
             forAll(testData) { expression, result ->
-                ReversePolishNotation.from(expression) shouldEqual result
+                MathUtils.fromInfixToPostfixNotation(expression) shouldEqual result
             }
         }
 
-        test("ReversePolishNotation.from() should return RPN for the complex expression") {
+        test("MathUtils.fromInfixToPostfixNotation() should return postfix notation for complex expression") {
             val testData = table(
                     headers("expression", "result"),
                     row("1 * 2 + 2.2", "1 2 * 2.2 +"),
@@ -84,28 +84,28 @@ class ReversePolishNotationTest : FunSpec() {
                     row("1 ^ ( 2 - 5 )", "1 2 5 - ^")
             )
             forAll(testData) { expression, result ->
-                ReversePolishNotation.from(expression) shouldEqual result
+                MathUtils.fromInfixToPostfixNotation(expression) shouldEqual result
             }
         }
 
-        test("ReversePolishNotation.from() throws IllegalArgumentException with message if the expression contains inconsistent parentheses") {
+        test("MathUtils.fromInfixToPostfixNotation() throws IllegalArgumentException if the expression contains inconsistent parentheses") {
             val testData = table(
                     headers("expression"),
                     row("( 1 + ( 2 + 3 )"),
-                    row("( 1 + ( 2 + 3"),
-                    row("1 + 2 + 3 )"),
-                    row("1 + 2 ) + 3 )"),
-                    row("( 1 + ) 2 + 3 )")
+                    row("( 5 + ( 2 + 3"),
+                    row("1 + 7 + 3 )"),
+                    row("1 + 2 ) + 8 )"),
+                    row("( 1 + ) 0 + 3 )")
             )
             forAll(testData) { expression ->
                 val exception = shouldThrow<IllegalArgumentException> {
-                    ReversePolishNotation.from(expression)
+                    MathUtils.fromInfixToPostfixNotation(expression)
                 }
                 exception.message shouldBe "The expression contains inconsistent parentheses"
             }
         }
 
-        test("ReversePolishNotation.from() should return RPN for the expression with parentheses") {
+        test("MathUtils.fromInfixToPostfixNotation() should return postfix notation with parentheses") {
             val testData = table(
                     headers("expression", "result"),
                     row("( 2 + 2.2 )", "2 2.2 +"),
@@ -114,12 +114,12 @@ class ReversePolishNotationTest : FunSpec() {
                     row("1 / ( 2 - 5 )", "1 2 5 - /")
             )
             forAll(testData) { expression, result ->
-                ReversePolishNotation.from(expression) shouldEqual result
+                MathUtils.fromInfixToPostfixNotation(expression) shouldEqual result
             }
         }
 
-        test("ReversePolishNotation.from() should return RPN for the expression with exponentiation") {
-            ReversePolishNotation.from("2 ^ 2") shouldEqual "2 2 ^"
+        test("MathUtils.fromInfixToPostfixNotation() should return postfix notation with exponentiation") {
+            MathUtils.fromInfixToPostfixNotation("2 ^ 2") shouldEqual "2 2 ^"
         }
     }
 }
