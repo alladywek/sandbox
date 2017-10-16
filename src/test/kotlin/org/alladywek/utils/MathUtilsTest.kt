@@ -148,7 +148,7 @@ class MathUtilsTest : FeatureSpec() {
                     row("1", "1")
                 )
                 forAll(testData) { expression, result ->
-                    assertTrue(MathUtils.calculateInfixExpression(expression) == BigDecimal(result).setScale(6).stripTrailingZeros())
+                    assertTrue(MathUtils.calculateInfixExpression(expression) == BigDecimal(result).setScale(10).stripTrailingZeros())
                 }
             }
 
@@ -162,7 +162,7 @@ class MathUtilsTest : FeatureSpec() {
                     row("8 - 2 + 5.5", "11.5")
                 )
                 forAll(testData) { expression, result ->
-                    assertTrue(MathUtils.calculateInfixExpression(expression) == BigDecimal(result).setScale(6).stripTrailingZeros())
+                    assertTrue(MathUtils.calculateInfixExpression(expression) == BigDecimal(result).setScale(10).stripTrailingZeros())
                 }
             }
         }

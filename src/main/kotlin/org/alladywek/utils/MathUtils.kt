@@ -73,7 +73,7 @@ class Multiply private constructor(priority: Int, action: (BigDecimal, BigDecima
 
 class Power private constructor(priority: Int, action: (BigDecimal, BigDecimal) -> BigDecimal) : OperationWithAction(priority, action) {
 
-    constructor() : this(3, { a: BigDecimal, b: BigDecimal -> BigDecimal(Math.pow(a.toDouble(), b.toDouble())) })
+    constructor() : this(3, { a: BigDecimal, b: BigDecimal -> BigDecimal(Math.pow(a.toDouble(), b.toDouble())).setScale(10, BigDecimal.ROUND_HALF_UP) })
 
     override fun toString(): String {
         return "^"
@@ -83,13 +83,10 @@ class Power private constructor(priority: Int, action: (BigDecimal, BigDecimal) 
 class Number(value: BigDecimal) : Sign() {
 
     var value: BigDecimal = value
-        private set(value) {
-            field = value.setScale(6, BigDecimal.ROUND_HALF_UP)
-        }
-        get() = field.stripTrailingZeros()
+        private set
 
     override fun toString(): String {
-        return value.toString()
+        return value.stripTrailingZeros().toString()
     }
 }
 
@@ -103,7 +100,7 @@ private fun String.toSigns(): List<Sign> {
             it == "(" -> OpeningParenthesis()
             it == ")" -> ClosingParenthesis()
             it == "^" -> Power()
-            it.toDoubleOrNull() != null -> Number(BigDecimal(it))
+            it.toDoubleOrNull() != null -> Number(BigDecimal(it).setScale(10, BigDecimal.ROUND_HALF_UP))
             else -> throw IllegalArgumentException("Unexpected sign [$it] in expression [$this]")
         }
     }
@@ -153,7 +150,7 @@ private fun validateFinalStack(stack: List<Sign>) {
 
 private fun List<Sign>.calculatePostfix(): BigDecimal {
     if (size == 1) {
-        return (first() as Number).value
+        return (first() as Number).value.setScale(10, BigDecimal.ROUND_HALF_UP).stripTrailingZeros()
     }
     val list = LinkedList<Sign>(this)
     while (list.size > 1) {
@@ -163,5 +160,5 @@ private fun List<Sign>.calculatePostfix(): BigDecimal {
         val operation = list[index] as OperationWithAction
         list[index] = Number(operation.action.invoke(val1.value, val2.value))
     }
-    return (list.first() as Number).value
+    return (list.first() as Number).value.setScale(10, BigDecimal.ROUND_HALF_UP).stripTrailingZeros()
 }
