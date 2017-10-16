@@ -1,10 +1,12 @@
 package org.alladywek.qsort
 
+import io.kotlintest.KTestJUnitRunner
 import io.kotlintest.matchers.shouldEqual
 import io.kotlintest.properties.Gen
 import io.kotlintest.specs.BehaviorSpec
+import org.junit.runner.RunWith
 
-
+@RunWith(KTestJUnitRunner::class)
 class QSortTest : BehaviorSpec() {
 
     init {

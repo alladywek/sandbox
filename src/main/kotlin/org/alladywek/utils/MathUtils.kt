@@ -11,6 +11,14 @@ class MathUtils {
             }
             return expression.toSigns().toPostfixNotation().buildString()
         }
+
+        @JvmStatic
+        fun calculateInfixExpression(expression: String): Double {
+            if (expression.isBlank()) {
+                return Double.NaN
+            }
+            return expression.toSigns().toPostfixNotation().calculatePostfix()
+        }
     }
 }
 
@@ -129,4 +137,8 @@ private fun validateFinalStack(stack: List<Sign>) {
     if (stack.any { it is OpeningParenthesis }) {
         throw IllegalArgumentException("The expression contains inconsistent parentheses")
     }
+}
+
+private fun List<Sign>.calculatePostfix(): Double {
+    return 0.0
 }
