@@ -11,6 +11,7 @@ import io.kotlintest.properties.table
 import io.kotlintest.specs.FeatureSpec
 import org.junit.Assert.assertTrue
 import org.junit.runner.RunWith
+import java.math.BigDecimal
 
 @RunWith(KTestJUnitRunner::class)
 class MathUtilsTest : FeatureSpec() {
@@ -18,7 +19,7 @@ class MathUtilsTest : FeatureSpec() {
     init {
 
         feature("MathUtils.fromInfixToPostfixNotation() functionality") {
-            
+
             scenario("should return empty string if the expression is blank") {
                 MathUtils.fromInfixToPostfixNotation("") shouldBe ""
                 MathUtils.fromInfixToPostfixNotation("    ") shouldBe ""
@@ -132,22 +133,36 @@ class MathUtilsTest : FeatureSpec() {
         feature("MathUtils.calculateInfixExpression() functionality") {
             
             scenario("should return Double.NaN if expression is blank") {
-                MathUtils.calculateInfixExpression("").isNaN() shouldBe true
-                MathUtils.calculateInfixExpression(" ").isNaN() shouldBe true
-                MathUtils.calculateInfixExpression("    ").isNaN() shouldBe true
+                MathUtils.calculateInfixExpression("") shouldEqual BigDecimal.ZERO
+                MathUtils.calculateInfixExpression(" ") shouldEqual BigDecimal.ZERO
+                MathUtils.calculateInfixExpression("    ") shouldEqual BigDecimal.ZERO
             }
 
             scenario("should return if expression contains just one number") {
                 val testData = table (
                     headers("expression", "result"),
-                    row("0.0", 0.0),
-                    row("0", 0.0),
-                    row("1.1", 1.1),
-                    row("-1.1", -1.1),
-                    row("1", 1.0)
+                    row("0.0", "0"),
+                    row("0", "0"),
+                    row("1.1", "1.1"),
+                    row("-1.1", "-1.1"),
+                    row("1", "1")
                 )
                 forAll(testData) { expression, result ->
-                    assertTrue(MathUtils.calculateInfixExpression(expression).compareTo(result) == 0)
+                    assertTrue(MathUtils.calculateInfixExpression(expression) == BigDecimal(result).setScale(6).stripTrailingZeros())
+                }
+            }
+
+            scenario("should calculate expression with '+' and 'minus'") {
+                val testData = table (
+                    headers("expression", "result"),
+                    row("1 + 2", "3"),
+                    row("5.0 - 4", "1"),
+                    row("1 - 1.11", "-0.11"),
+                    row("-2 + 2", "0"),
+                    row("8 - 2 + 5.5", "11.5")
+                )
+                forAll(testData) { expression, result ->
+                    assertTrue(MathUtils.calculateInfixExpression(expression) == BigDecimal(result).setScale(6).stripTrailingZeros())
                 }
             }
         }

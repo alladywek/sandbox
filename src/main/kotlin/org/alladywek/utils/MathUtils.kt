@@ -1,5 +1,8 @@
 package org.alladywek.utils
 
+import java.math.BigDecimal
+import java.util.*
+
 class MathUtils {
 
     companion object {
@@ -13,9 +16,9 @@ class MathUtils {
         }
 
         @JvmStatic
-        fun calculateInfixExpression(expression: String): Double {
+        fun calculateInfixExpression(expression: String): BigDecimal {
             if (expression.isBlank()) {
-                return Double.NaN
+                return BigDecimal.ZERO
             }
             return expression.toSigns().toPostfixNotation().calculatePostfix()
         }
@@ -26,58 +29,67 @@ sealed class Sign
 
 open class Operation(val priority: Int) : Sign()
 
+open class OperationWithAction(priority: Int, val action: (BigDecimal, BigDecimal) -> BigDecimal) : Operation(priority)
+
 class OpeningParenthesis : Operation(0)
 
 class ClosingParenthesis : Operation(0)
 
-class Plus : Operation(1) {
+class Plus private constructor(priority: Int, action: (BigDecimal, BigDecimal) -> BigDecimal) : OperationWithAction(priority, action) {
 
-    val operation: (Double, Double) -> Double = { a: Double, b: Double -> a + b }
+    constructor() : this(1, { a: BigDecimal, b: BigDecimal -> a + b })
 
     override fun toString(): String {
         return "+"
     }
 }
 
-class Minus : Operation(1) {
+class Minus private constructor(priority: Int, action: (BigDecimal, BigDecimal) -> BigDecimal) : OperationWithAction(priority, action) {
 
-    val operation: (Double, Double) -> Double = { a: Double, b: Double -> a + b }
+    constructor() : this(1, { a: BigDecimal, b: BigDecimal -> a - b })
 
     override fun toString(): String {
         return "-"
     }
 }
 
-class Divide : Operation(2) {
+class Divide private constructor(priority: Int, action: (BigDecimal, BigDecimal) -> BigDecimal) : OperationWithAction(priority, action) {
 
-    val operation: (Double, Double) -> Double = { a: Double, b: Double -> a / b }
+    constructor() : this(2, { a: BigDecimal, b: BigDecimal -> a / b })
 
     override fun toString(): String {
         return "/"
     }
 }
 
-class Multiply : Operation(2) {
+class Multiply private constructor(priority: Int, action: (BigDecimal, BigDecimal) -> BigDecimal) : OperationWithAction(priority, action) {
 
-    val operation: (Double, Double) -> Double = { a: Double, b: Double -> a * b }
+    constructor() : this(2, { a: BigDecimal, b: BigDecimal -> a * b })
 
     override fun toString(): String {
         return "*"
     }
 }
 
-class Power : Operation(3) {
+class Power private constructor(priority: Int, action: (BigDecimal, BigDecimal) -> BigDecimal) : OperationWithAction(priority, action) {
 
-    val operation: (Double, Double) -> Double = { a: Double, b: Double -> Math.pow(a, b) }
+    constructor() : this(3, { a: BigDecimal, b: BigDecimal -> BigDecimal(Math.pow(a.toDouble(), b.toDouble())) })
 
     override fun toString(): String {
         return "^"
     }
 }
 
-data class Number(val value: Double) : Sign() {
+class Number(value: BigDecimal) : Sign() {
+
+    var value: BigDecimal = value
+        private set(value) {
+            field = value.setScale(6, BigDecimal.ROUND_HALF_UP)
+        }
+        get() = field.stripTrailingZeros()
+
     override fun toString(): String {
-        return if (value.toString().endsWith(".0")) value.toLong().toString() else value.toString()
+        return value.toString()
     }
 }
 
@@ -91,7 +103,7 @@ private fun String.toSigns(): List<Sign> {
             it == "(" -> OpeningParenthesis()
             it == ")" -> ClosingParenthesis()
             it == "^" -> Power()
-            it.toDoubleOrNull() != null -> Number(it.toDouble())
+            it.toDoubleOrNull() != null -> Number(BigDecimal(it))
             else -> throw IllegalArgumentException("Unexpected sign [$it] in expression [$this]")
         }
     }
@@ -139,9 +151,17 @@ private fun validateFinalStack(stack: List<Sign>) {
     }
 }
 
-private fun List<Sign>.calculatePostfix(): Double {
+private fun List<Sign>.calculatePostfix(): BigDecimal {
     if (size == 1) {
         return (first() as Number).value
     }
-    return 0.0
+    val list = LinkedList<Sign>(this)
+    while (list.size > 1) {
+        val index = list.indexOfFirst { it is Operation } - 2
+        val val1 = list.removeAt(index) as Number
+        val val2 = list.removeAt(index) as Number
+        val operation = list[index] as OperationWithAction
+        list[index] = Number(operation.action.invoke(val1.value, val2.value))
+    }
+    return (list.first() as Number).value
 }
