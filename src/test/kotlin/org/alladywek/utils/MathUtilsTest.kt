@@ -132,13 +132,13 @@ class MathUtilsTest : FeatureSpec() {
 
         feature("MathUtils.calculateInfixExpression() functionality") {
             
-            scenario("should return Double.NaN if expression is blank") {
+            scenario("should return BigDecimal.Zero if expression is blank") {
                 MathUtils.calculateInfixExpression("") shouldEqual BigDecimal.ZERO
                 MathUtils.calculateInfixExpression(" ") shouldEqual BigDecimal.ZERO
                 MathUtils.calculateInfixExpression("    ") shouldEqual BigDecimal.ZERO
             }
 
-            scenario("should return if expression contains just one number") {
+            scenario("should return the same value if expression contains just one number") {
                 val testData = table (
                     headers("expression", "result"),
                     row("0.0", "0"),
@@ -152,7 +152,7 @@ class MathUtilsTest : FeatureSpec() {
                 }
             }
 
-            scenario("should calculate expression with '+' and 'minus'") {
+            scenario("should calculate expression with '+' and '-'") {
                 val testData = table (
                     headers("expression", "result"),
                     row("1 + 2", "3"),
@@ -160,6 +160,22 @@ class MathUtilsTest : FeatureSpec() {
                     row("1 - 1.11", "-0.11"),
                     row("-2 + 2", "0"),
                     row("8 - 2 + 5.5", "11.5")
+                )
+                forAll(testData) { expression, result ->
+                    assertTrue(MathUtils.calculateInfixExpression(expression) == BigDecimal(result).setScale(10).stripTrailingZeros())
+                }
+            }
+
+            scenario("should calculate expression with '*' and '-'") {
+                val testData = table (
+                    headers("expression", "result"),
+                    row("1 * 2", "2"),
+                    row("5.0 / 4", "1.25"),
+                    row("1 * 1.11", "1.11"),
+                    row("-2 / 2", "-1"),
+                    row("1 / 3", "0.3333333333"),
+                    row("0.3333333333 * 3", "0.9999999999"),
+                    row("8 / 2 * 5.5", "22")
                 )
                 forAll(testData) { expression, result ->
                     assertTrue(MathUtils.calculateInfixExpression(expression) == BigDecimal(result).setScale(10).stripTrailingZeros())
