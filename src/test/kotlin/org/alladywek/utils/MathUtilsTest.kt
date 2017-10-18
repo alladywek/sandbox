@@ -165,10 +165,11 @@ class MathUtilsTest : FeatureSpec() {
                 }
             }
 
-            scenario("should calculate expression with '*' and '-'") {
+            scenario("should calculate expression with '*' and '/'") {
                 val testData = table(
                         headers("expression", "result"),
                         row("1 * 2", "2"),
+                        row("0 / 5", "0"),
                         row("5.0 / 4", "1.25"),
                         row("1 * 1.11", "1.11"),
                         row("-2 / 2", "-1"),
