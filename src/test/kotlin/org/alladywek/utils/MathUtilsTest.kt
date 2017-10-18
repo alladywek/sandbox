@@ -149,7 +149,7 @@ class MathUtilsTest : FeatureSpec() {
                     row("1", "1")
                 )
                 forAll(testData) { expression, result ->
-                    assertTrue(MathUtils.calculateInfixExpression(expression) == BigDecimal(result).setScale(10).stripTrailingZeros())
+                    MathUtils.calculateInfixExpression(expression) shouldBe BigDecimal(result).setScale(10).stripTrailingZeros()
                 }
             }
 
@@ -163,7 +163,7 @@ class MathUtilsTest : FeatureSpec() {
                     row("8 - 2 + 5.5", "11.5")
                 )
                 forAll(testData) { expression, result ->
-                    assertTrue(MathUtils.calculateInfixExpression(expression) == BigDecimal(result).setScale(10).stripTrailingZeros())
+                    MathUtils.calculateInfixExpression(expression) shouldBe BigDecimal(result).setScale(10).stripTrailingZeros()
                 }
             }
 
@@ -179,7 +179,7 @@ class MathUtilsTest : FeatureSpec() {
                     row("8 / 2 * 5.5", "22")
                 )
                 forAll(testData) { expression, result ->
-                    assertTrue(MathUtils.calculateInfixExpression(expression) == BigDecimal(result).setScale(10).stripTrailingZeros())
+                    MathUtils.calculateInfixExpression(expression) shouldBe BigDecimal(result).setScale(10).stripTrailingZeros()
                 }
             }
 
@@ -198,7 +198,21 @@ class MathUtilsTest : FeatureSpec() {
                         row("0 ^ 2", "0")
                 )
                 forAll(testData) { expression, result ->
-                    assertEquals(BigDecimal(result).setScale(10).stripTrailingZeros(), MathUtils.calculateInfixExpression(expression))
+                    MathUtils.calculateInfixExpression(expression) shouldBe BigDecimal(result).setScale(10).stripTrailingZeros()
+                }
+            }
+
+            feature("should calculate complex expression") {
+                val testData = table (
+                        headers("expression", "result"),
+                        row("1 + 1 ^ 2", "2"),
+                        row("5.0 ^ 4 - 8", "617"),
+                        row("1 * 1 ^ 0.5", "1"),
+                        row("-2 ^ ( 2 + 1 )", "-8"),
+                        row("1 + 5 * 8 - 6 / 2.59 * ( -2 - -1 ^ 3 )", "43.3166023166")
+                )
+                forAll(testData) { expression, result ->
+                    MathUtils.calculateInfixExpression(expression) shouldBe BigDecimal(result).setScale(10).stripTrailingZeros()
                 }
             }
         }
