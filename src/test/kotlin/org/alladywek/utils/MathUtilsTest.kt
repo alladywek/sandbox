@@ -9,8 +9,6 @@ import io.kotlintest.properties.headers
 import io.kotlintest.properties.row
 import io.kotlintest.properties.table
 import io.kotlintest.specs.FeatureSpec
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.runner.RunWith
 import java.math.BigDecimal
 
@@ -132,7 +130,7 @@ class MathUtilsTest : FeatureSpec() {
         }
 
         feature("MathUtils.calculateInfixExpression() functionality") {
-            
+
             scenario("should return BigDecimal.Zero if expression is blank") {
                 MathUtils.calculateInfixExpression("") shouldEqual BigDecimal.ZERO
                 MathUtils.calculateInfixExpression(" ") shouldEqual BigDecimal.ZERO
@@ -140,13 +138,13 @@ class MathUtilsTest : FeatureSpec() {
             }
 
             scenario("should return the same value if expression contains just one number") {
-                val testData = table (
-                    headers("expression", "result"),
-                    row("0.0", "0"),
-                    row("0", "0"),
-                    row("1.1", "1.1"),
-                    row("-1.1", "-1.1"),
-                    row("1", "1")
+                val testData = table(
+                        headers("expression", "result"),
+                        row("0.0", "0"),
+                        row("0", "0"),
+                        row("1.1", "1.1"),
+                        row("-1.1", "-1.1"),
+                        row("1", "1")
                 )
                 forAll(testData) { expression, result ->
                     MathUtils.calculateInfixExpression(expression) shouldBe BigDecimal(result).setScale(10).stripTrailingZeros()
@@ -154,13 +152,13 @@ class MathUtilsTest : FeatureSpec() {
             }
 
             scenario("should calculate expression with '+' and '-'") {
-                val testData = table (
-                    headers("expression", "result"),
-                    row("1 + 2", "3"),
-                    row("5.0 - 4", "1"),
-                    row("1 - 1.11", "-0.11"),
-                    row("-2 + 2", "0"),
-                    row("8 - 2 + 5.5", "11.5")
+                val testData = table(
+                        headers("expression", "result"),
+                        row("1 + 2", "3"),
+                        row("5.0 - 4", "1"),
+                        row("1 - 1.11", "-0.11"),
+                        row("-2 + 2", "0"),
+                        row("8 - 2 + 5.5", "11.5")
                 )
                 forAll(testData) { expression, result ->
                     MathUtils.calculateInfixExpression(expression) shouldBe BigDecimal(result).setScale(10).stripTrailingZeros()
@@ -168,15 +166,15 @@ class MathUtilsTest : FeatureSpec() {
             }
 
             scenario("should calculate expression with '*' and '-'") {
-                val testData = table (
-                    headers("expression", "result"),
-                    row("1 * 2", "2"),
-                    row("5.0 / 4", "1.25"),
-                    row("1 * 1.11", "1.11"),
-                    row("-2 / 2", "-1"),
-                    row("1 / 3", "0.3333333333"),
-                    row("0.3333333333 * 3", "0.9999999999"),
-                    row("8 / 2 * 5.5", "22")
+                val testData = table(
+                        headers("expression", "result"),
+                        row("1 * 2", "2"),
+                        row("5.0 / 4", "1.25"),
+                        row("1 * 1.11", "1.11"),
+                        row("-2 / 2", "-1"),
+                        row("1 / 3", "0.3333333333"),
+                        row("0.3333333333 * 3", "0.9999999999"),
+                        row("8 / 2 * 5.5", "22")
                 )
                 forAll(testData) { expression, result ->
                     MathUtils.calculateInfixExpression(expression) shouldBe BigDecimal(result).setScale(10).stripTrailingZeros()
@@ -184,7 +182,7 @@ class MathUtilsTest : FeatureSpec() {
             }
 
             feature("should calculate expression with '^'") {
-                val testData = table (
+                val testData = table(
                         headers("expression", "result"),
                         row("1 ^ 2", "1"),
                         row("5.0 ^ 4", "625"),
@@ -203,7 +201,7 @@ class MathUtilsTest : FeatureSpec() {
             }
 
             feature("should calculate complex expression") {
-                val testData = table (
+                val testData = table(
                         headers("expression", "result"),
                         row("1 + 1 ^ 2", "2"),
                         row("5.0 ^ 4 - 8", "617"),
@@ -213,6 +211,23 @@ class MathUtilsTest : FeatureSpec() {
                 )
                 forAll(testData) { expression, result ->
                     MathUtils.calculateInfixExpression(expression) shouldBe BigDecimal(result).setScale(10).stripTrailingZeros()
+                }
+            }
+
+            feature("should throw exception in case of dividing by zero") {
+                val testData = table(
+                        headers("expression"),
+                        row("0 / 0"),
+                        row("5.0 / 0"),
+                        row("1 / 0"),
+                        row("-2 / ( 2 - 2 )"),
+                        row("( 2 + 2 ) / ( 5 / 5 - 1 )")
+                )
+                forAll(testData) { expression ->
+                    val exception = shouldThrow<ArithmeticException> {
+                        MathUtils.calculateInfixExpression(expression)
+                    }
+                    exception.message shouldBe "Division by zero"
                 }
             }
         }

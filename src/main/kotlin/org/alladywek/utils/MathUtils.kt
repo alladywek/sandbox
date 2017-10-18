@@ -1,6 +1,7 @@
 package org.alladywek.utils
 
 import java.math.BigDecimal
+import java.math.BigDecimal.ZERO
 import java.util.*
 
 class MathUtils {
@@ -18,7 +19,7 @@ class MathUtils {
         @JvmStatic
         fun calculateInfixExpression(expression: String): BigDecimal {
             if (expression.isBlank()) {
-                return BigDecimal.ZERO
+                return ZERO
             }
             return expression.toSigns().toPostfixNotation().calculatePostfix()
         }
@@ -55,7 +56,7 @@ class Minus private constructor(priority: Int, action: (BigDecimal, BigDecimal) 
 
 class Divide private constructor(priority: Int, action: (BigDecimal, BigDecimal) -> BigDecimal) : OperationWithAction(priority, action) {
 
-    constructor() : this(2, { a: BigDecimal, b: BigDecimal -> a / b })
+    constructor() : this(2, { a, b -> if (b.compareTo(ZERO) != 0) a / b else throw ArithmeticException("Division by zero") })
 
     override fun toString(): String {
         return "/"
