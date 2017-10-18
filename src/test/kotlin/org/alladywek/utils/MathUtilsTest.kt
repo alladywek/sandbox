@@ -9,6 +9,7 @@ import io.kotlintest.properties.headers
 import io.kotlintest.properties.row
 import io.kotlintest.properties.table
 import io.kotlintest.specs.FeatureSpec
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.runner.RunWith
 import java.math.BigDecimal
@@ -179,6 +180,24 @@ class MathUtilsTest : FeatureSpec() {
                 )
                 forAll(testData) { expression, result ->
                     assertTrue(MathUtils.calculateInfixExpression(expression) == BigDecimal(result).setScale(10).stripTrailingZeros())
+                }
+            }
+
+            feature("should calculate expression with '^'") {
+                val testData = table (
+                        headers("expression", "result"),
+                        row("1 ^ 2", "1"),
+                        row("5.0 ^ 4", "625"),
+                        row("1 ^ 1.11", "1"),
+                        row("-2 ^ 2", "4"),
+                        row("-2 ^ 3", "-8"),
+                        row("5 ^ 0", "1"),
+                        row("5 ^ -2", "0.04"),
+                        row("5 ^ -0", "1"),
+                        row("0 ^ 2", "0")
+                )
+                forAll(testData) { expression, result ->
+                    assertEquals(BigDecimal(result).setScale(10).stripTrailingZeros(), MathUtils.calculateInfixExpression(expression))
                 }
             }
         }
