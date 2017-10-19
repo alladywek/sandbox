@@ -109,7 +109,7 @@ private fun String.toSigns(): List<Sign> {
 
 private fun List<Sign>.toPostfixNotation(): List<Sign> {
     val result = arrayListOf<Sign>()
-    val stack = arrayListOf<Operation>()
+    val stack = LinkedList<Operation>()
     this.forEach {
         when (it) {
             is Number -> result.add(it)
@@ -126,19 +126,19 @@ private fun List<Sign>.buildString(): String {
     return this.joinToString(" ")
 }
 
-private fun processCloseBracket(result: ArrayList<Sign>, stack: ArrayList<Operation>) {
+private fun processCloseBracket(result: ArrayList<Sign>, stack: LinkedList<Operation>) {
     if (stack.isNotEmpty() && stack.any { it is OpeningParenthesis }) {
         while (true) {
-            val stackElement = stack.removeAt(stack.lastIndex)
+            val stackElement = stack.removeLast()
             if (stackElement is OpeningParenthesis) return else result.add(stackElement)
         }
     }
     throw IllegalArgumentException("The expression contains inconsistent parentheses")
 }
 
-private fun processOperation(result: ArrayList<Sign>, stack: ArrayList<Operation>, currentOperation: Operation) {
+private fun processOperation(result: ArrayList<Sign>, stack: LinkedList<Operation>, currentOperation: Operation) {
     while (stack.isNotEmpty() && (stack.last().priority >= currentOperation.priority)) {
-        result.add(stack.removeAt(stack.lastIndex))
+        result.add(stack.removeLast())
     }
     stack.add(currentOperation)
 }
@@ -159,7 +159,7 @@ private fun List<Sign>.calculatePostfix(): BigDecimal {
         val val1 = list.removeAt(index) as Number
         val val2 = list.removeAt(index) as Number
         val operation = list[index] as OperationWithAction
-        list[index] = Number(operation.action.invoke(val1.value, val2.value))
+        list[index] = Number(operation.action(val1.value, val2.value))
     }
     return (list.first() as Number).value.setScale(10, BigDecimal.ROUND_HALF_UP).stripTrailingZeros()
 }
