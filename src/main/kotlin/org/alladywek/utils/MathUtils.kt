@@ -1,6 +1,7 @@
 package org.alladywek.utils
 
 import java.math.BigDecimal
+import java.math.BigDecimal.ROUND_HALF_UP
 import java.math.BigDecimal.ZERO
 import java.util.*
 
@@ -21,7 +22,7 @@ class MathUtils {
             if (expression.isBlank()) {
                 return ZERO
             }
-            return expression.toSigns().toPostfixNotation().calculatePostfix()
+            return expression.toSigns().toPostfixNotation().calculatePostfix(10)
         }
     }
 }
@@ -74,7 +75,7 @@ class Multiply private constructor(priority: Int, action: (BigDecimal, BigDecima
 
 class Power private constructor(priority: Int, action: (BigDecimal, BigDecimal) -> BigDecimal) : OperationWithAction(priority, action) {
 
-    constructor() : this(3, { a: BigDecimal, b: BigDecimal -> BigDecimal(Math.pow(a.toDouble(), b.toDouble())).setScale(10, BigDecimal.ROUND_HALF_UP) })
+    constructor() : this(3, { a: BigDecimal, b: BigDecimal -> BigDecimal(Math.pow(a.toDouble(), b.toDouble())) })
 
     override fun toString(): String {
         return "^"
@@ -83,12 +84,8 @@ class Power private constructor(priority: Int, action: (BigDecimal, BigDecimal) 
 
 class Number(value: BigDecimal) : Sign() {
 
-    var value: BigDecimal = value
+    var value: BigDecimal = value.setScale(128, ROUND_HALF_UP)
         private set
-
-    override fun toString(): String {
-        return value.stripTrailingZeros().toString()
-    }
 }
 
 private fun String.toSigns(): List<Sign> {
@@ -101,7 +98,7 @@ private fun String.toSigns(): List<Sign> {
             it == "(" -> OpeningParenthesis()
             it == ")" -> ClosingParenthesis()
             it == "^" -> Power()
-            it.toDoubleOrNull() != null -> Number(BigDecimal(it).setScale(10, BigDecimal.ROUND_HALF_UP))
+            it.toDoubleOrNull() != null -> Number(BigDecimal(it))
             else -> throw IllegalArgumentException("Unexpected sign [$it] in expression [$this]")
         }
     }
@@ -123,7 +120,11 @@ private fun List<Sign>.toPostfixNotation(): List<Sign> {
 }
 
 private fun List<Sign>.buildString(): String {
-    return this.joinToString(" ")
+    return this.joinToString(" ") { (it as? Number)?.value?.stripTrailingZeros()?.toString() ?: it.toString() }
+}
+
+private fun BigDecimal.prettyScale(scale: Int): BigDecimal {
+    return this.setScale(scale, ROUND_HALF_UP).stripTrailingZeros()
 }
 
 private fun processCloseBracket(result: ArrayList<Sign>, stack: LinkedList<Operation>) {
@@ -149,9 +150,9 @@ private fun validateFinalStack(stack: List<Sign>) {
     }
 }
 
-private fun List<Sign>.calculatePostfix(): BigDecimal {
+private fun List<Sign>.calculatePostfix(scale: Int): BigDecimal {
     if (size == 1) {
-        return (first() as Number).value.setScale(10, BigDecimal.ROUND_HALF_UP).stripTrailingZeros()
+        return (single() as Number).value.prettyScale(scale)
     }
     val list = LinkedList<Sign>(this)
     while (list.size > 1) {
@@ -161,5 +162,5 @@ private fun List<Sign>.calculatePostfix(): BigDecimal {
         val operation = list[index] as OperationWithAction
         list[index] = Number(operation.action(val1.value, val2.value))
     }
-    return (list.first() as Number).value.setScale(10, BigDecimal.ROUND_HALF_UP).stripTrailingZeros()
+    return (list.single() as Number).value.prettyScale(scale)
 }

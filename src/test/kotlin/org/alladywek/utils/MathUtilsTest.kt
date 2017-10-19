@@ -94,6 +94,24 @@ class MathUtilsTest : FeatureSpec() {
                 }
             }
 
+            scenario("should return result with one number expression") {
+                val testData = table(
+                        headers("expression", "result"),
+                        row("0", "0"),
+                        row("-0", "0"),
+                        row("+0", "0"),
+                        row("15", "15"),
+                        row("-15", "-15"),
+                        row("+15", "15"),
+                        row("15.5009", "15.5009"),
+                        row("-15.5009", "-15.5009"),
+                        row("+15.5009", "15.5009")
+                )
+                forAll(testData) { expression, result ->
+                    MathUtils.fromInfixToPostfixNotation(expression) shouldEqual result
+                }
+            }
+
             scenario("throws IllegalArgumentException if the expression contains inconsistent parentheses") {
                 val testData = table(
                         headers("expression"),
@@ -140,11 +158,18 @@ class MathUtilsTest : FeatureSpec() {
             scenario("should return the same value if expression contains just one number") {
                 val testData = table(
                         headers("expression", "result"),
-                        row("0.0", "0"),
                         row("0", "0"),
-                        row("1.1", "1.1"),
-                        row("-1.1", "-1.1"),
-                        row("1", "1")
+                        row("-0", "0"),
+                        row("+0", "0"),
+                        row("0.0", "0"),
+                        row("-0.0", "0"),
+                        row("+0.0", "0"),
+                        row("15", "15"),
+                        row("-15", "-15"),
+                        row("+15", "15"),
+                        row("15.5009", "15.5009"),
+                        row("-15.5009", "-15.5009"),
+                        row("+15.5009", "15.5009")
                 )
                 forAll(testData) { expression, result ->
                     MathUtils.calculateInfixExpression(expression) shouldBe BigDecimal(result).setScale(10).stripTrailingZeros()
@@ -158,6 +183,7 @@ class MathUtilsTest : FeatureSpec() {
                         row("5.0 - 4", "1"),
                         row("1 - 1.11", "-0.11"),
                         row("-2 + 2", "0"),
+                        row("0.9999999999 + 0.0000000001", "1"),
                         row("8 - 2 + 5.5", "11.5")
                 )
                 forAll(testData) { expression, result ->
