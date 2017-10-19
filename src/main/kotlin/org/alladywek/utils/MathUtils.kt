@@ -9,7 +9,8 @@ class MathUtils {
 
     companion object {
 
-        @JvmStatic
+        private val DEFAULT_SCALE: Int = 10
+
         fun fromInfixToPostfixNotation(expression: String): String {
             if (expression.isBlank()) {
                 return ""
@@ -17,12 +18,16 @@ class MathUtils {
             return expression.toSigns().toPostfixNotation().buildString()
         }
 
-        @JvmStatic
-        fun calculateInfixExpression(expression: String): BigDecimal {
+        fun calculateInfixExpression(expression: String, scale: Int = DEFAULT_SCALE): BigDecimal {
             if (expression.isBlank()) {
                 return ZERO
             }
-            return expression.toSigns().toPostfixNotation().calculatePostfix(10)
+            validateScale(scale)
+            return expression.toSigns().toPostfixNotation().calculatePostfix(scale)
+        }
+
+        private fun validateScale(scale: Int) {
+            if (scale !in 0..128) throw IllegalArgumentException("Scale value should be integer in range: -1 < scale < 129")
         }
     }
 }
@@ -84,7 +89,9 @@ class Power private constructor(priority: Int, action: (BigDecimal, BigDecimal) 
 
 class Number(value: BigDecimal) : Sign() {
 
-    var value: BigDecimal = value.setScale(128, ROUND_HALF_UP)
+    private companion object { @JvmStatic private val DEFAULT_NUMBER_SCALE = 128 }
+
+    var value: BigDecimal = value.setScale(DEFAULT_NUMBER_SCALE, ROUND_HALF_UP)
         private set
 }
 

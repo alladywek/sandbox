@@ -9,6 +9,8 @@ import io.kotlintest.properties.headers
 import io.kotlintest.properties.row
 import io.kotlintest.properties.table
 import io.kotlintest.specs.FeatureSpec
+import org.hamcrest.core.IsEqual
+import org.junit.Assert
 import org.junit.runner.RunWith
 import java.math.BigDecimal
 
@@ -172,7 +174,7 @@ class MathUtilsTest : FeatureSpec() {
                         row("+15.5009", "15.5009")
                 )
                 forAll(testData) { expression, result ->
-                    MathUtils.calculateInfixExpression(expression) shouldBe BigDecimal(result).setScale(10).stripTrailingZeros()
+                    MathUtils.calculateInfixExpression(expression) shouldBe BigDecimal(result).setScale(10, BigDecimal.ROUND_HALF_UP).stripTrailingZeros()
                 }
             }
 
@@ -187,7 +189,7 @@ class MathUtilsTest : FeatureSpec() {
                         row("8 - 2 + 5.5", "11.5")
                 )
                 forAll(testData) { expression, result ->
-                    MathUtils.calculateInfixExpression(expression) shouldBe BigDecimal(result).setScale(10).stripTrailingZeros()
+                    MathUtils.calculateInfixExpression(expression) shouldBe BigDecimal(result).setScale(10, BigDecimal.ROUND_HALF_UP).stripTrailingZeros()
                 }
             }
 
@@ -204,7 +206,7 @@ class MathUtilsTest : FeatureSpec() {
                         row("8 / 2 * 5.5", "22")
                 )
                 forAll(testData) { expression, result ->
-                    MathUtils.calculateInfixExpression(expression) shouldBe BigDecimal(result).setScale(10).stripTrailingZeros()
+                    MathUtils.calculateInfixExpression(expression) shouldBe BigDecimal(result).setScale(10, BigDecimal.ROUND_HALF_UP).stripTrailingZeros()
                 }
             }
 
@@ -223,7 +225,7 @@ class MathUtilsTest : FeatureSpec() {
                         row("0 ^ 2", "0")
                 )
                 forAll(testData) { expression, result ->
-                    MathUtils.calculateInfixExpression(expression) shouldBe BigDecimal(result).setScale(10).stripTrailingZeros()
+                    MathUtils.calculateInfixExpression(expression) shouldBe BigDecimal(result).setScale(10, BigDecimal.ROUND_HALF_UP).stripTrailingZeros()
                 }
             }
 
@@ -237,7 +239,7 @@ class MathUtilsTest : FeatureSpec() {
                         row("1 + 5 * 8 - 6 / 2.59 * ( -2 - -1 ^ 3 )", "43.3166023166")
                 )
                 forAll(testData) { expression, result ->
-                    MathUtils.calculateInfixExpression(expression) shouldBe BigDecimal(result).setScale(10).stripTrailingZeros()
+                    MathUtils.calculateInfixExpression(expression) shouldBe BigDecimal(result).setScale(10, BigDecimal.ROUND_HALF_UP).stripTrailingZeros()
                 }
             }
 
@@ -255,6 +257,65 @@ class MathUtilsTest : FeatureSpec() {
                         MathUtils.calculateInfixExpression(expression)
                     }
                     exception.message shouldBe "Division by zero"
+                }
+            }
+        }
+
+        feature("MathUtils.calculateInfixExpression() functionality with scale") {
+
+            scenario("should return result using default scale value which is 10") {
+                val testData = table(
+                        headers("expression", "result"),
+                        row("0.111111111911111", "0.1111111119"),
+                        row("1 / 3", "0.3333333333"),
+                        row("0.10000000004444", "0.1")
+                )
+                forAll(testData) { expression, result ->
+                    MathUtils.calculateInfixExpression(expression) shouldBe BigDecimal(result).setScale(10, BigDecimal.ROUND_HALF_UP).stripTrailingZeros()
+                }
+            }
+
+            scenario("should return result depending on scale") {
+                val testData = table(
+                        headers("expression", "scale", "result"),
+                        row("175." + "1".repeat(128), 128, "175." + "1".repeat(128)),
+                        row("175.1234123412341234123", 15, "175.123412341234123"),
+                        row("175.0000000000000034123", 15, "175.000000000000003"),
+                        row("175.1234123412341234123", 10, "175.1234123412"),
+                        row("175.1234123412341234123", 5, "175.12341"),
+                        row("175.1234123412341234123", 1, "175.1"),
+                        row("175.1234123412341234123", 0, "175.1234123412341234123")
+                )
+                forAll(testData) { expression, scale, result ->
+                    MathUtils.calculateInfixExpression(expression, scale) shouldBe BigDecimal(result).setScale(scale, BigDecimal.ROUND_HALF_UP).stripTrailingZeros()
+                }
+            }
+
+            scenario("should throw IllegalArgumentException exception with message if 0 > scale or scale > 128") {
+                val testData = table(
+                        headers("scale"),
+                        row(-1),
+                        row(129)
+                )
+                forAll(testData) { scale ->
+                    val exception = shouldThrow<IllegalArgumentException> {
+                        MathUtils.calculateInfixExpression("10", scale)
+                    }
+                    exception.message shouldBe "Scale value should be integer in range: -1 < scale < 129"
+                }
+            }
+
+            scenario("should return result with rounded last number depending on scale") {
+                val testData = table(
+                        headers("expression", "scale", "result"),
+                        row("125.567890", 5, "125.56789"),
+                        row("125.567899", 5, "125.5679"),
+                        row("125.567895", 5, "125.5679"),
+                        row("125.567875", 5, "125.56788"),
+                        row("125.567873", 5, "125.56787")
+                )
+                forAll(testData) { expression, scale, result ->
+                    Assert.assertThat(MathUtils.calculateInfixExpression(expression, scale).compareTo(BigDecimal(result).setScale(scale, BigDecimal.ROUND_HALF_UP).stripTrailingZeros()), IsEqual<Int>(0))
                 }
             }
         }
