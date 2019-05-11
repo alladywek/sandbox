@@ -6,7 +6,10 @@ fun sortVouchers(vouchers: String): Result<ValidationError, String> {
     val sortedVouchers = vouchers
             .split(",")
             .map(String::buildVoucherFromString)
-            .sortedWith(compareBy { it.date })
+            .sortedWith(compareBy(
+                    { it.endDate },
+                    { it.status }
+            ))
             .joinToString(",")
     return Result.Success(sortedVouchers)
 }
@@ -16,8 +19,8 @@ private fun String.buildVoucherFromString(): Voucher {
     return Voucher(date.toLong(), status, id)
 }
 
-private class Voucher(val date: Long, val status: String, val id: String) {
-    override fun toString(): String = "$date:$status:$id"
+private class Voucher(val endDate: Long, val status: String, val id: String) {
+    override fun toString(): String = "$endDate:$status:$id"
 }
 
 sealed class Result<out E, out V> {

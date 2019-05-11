@@ -41,13 +41,25 @@ class SortVouchersTest {
                 .isA<ValidationError.VouchersStringIsBlankOrEmpty>()
     }
 
-    @ParameterizedTest(name = "sortVouchers() sorts vouchers by date")
+    @ParameterizedTest(name = "sortVouchers() sorts vouchers by endDate ascending for current rewards(only Activated)")
     @CsvSource(delimiter = '|', value = [
         "190111:Activated:aaaa,190110:Activated:bbbb | 190110:Activated:bbbb,190111:Activated:aaaa",
         "200101:Activated:aaaa,191231:Activated:bbbb | 191231:Activated:bbbb,200101:Activated:aaaa",
         "191010:Activated:aaaa,191009:Activated:bbbb,190908:Activated:cccc | 190908:Activated:cccc,191009:Activated:bbbb,191010:Activated:aaaa"
     ])
     fun test3(@CsvToVouchersData data: VouchersData) {
+        val result = sortVouchers(data.input)
+        expectThat(result)
+                .isA<Success<String>>()
+                .get { value }
+                .isEqualTo(data.expected)
+    }
+
+    @ParameterizedTest(name = "sortVouchers() sorts vouchers by endDate ascending for current rewards(Activated and Available)")
+    @CsvSource(delimiter = '|', value = [
+        "190110:Available:aaaa,190110:Activated:bbbb | 190110:Activated:bbbb,190110:Available:aaaa"
+    ])
+    fun test4(@CsvToVouchersData data: VouchersData) {
         val result = sortVouchers(data.input)
         expectThat(result)
                 .isA<Success<String>>()
