@@ -1,4 +1,4 @@
-package challange4
+package challenge4
 
 fun sortVouchers(vouchers: String): Result<ValidationError, String> {
     if (vouchers.isBlank())

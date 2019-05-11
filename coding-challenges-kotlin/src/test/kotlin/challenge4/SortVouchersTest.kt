@@ -1,9 +1,9 @@
-package challange4
+package challenge4
 
-import challange4.Result.Error
-import challange4.Result.Success
-import challange4.VouchersDataAggregator.CsvToVouchersData
-import challange4.VouchersDataAggregator.VouchersData
+import challenge4.Result.Error
+import challenge4.Result.Success
+import challenge4.VouchersDataAggregator.CsvToVouchersData
+import challenge4.VouchersDataAggregator.VouchersData
 import org.junit.jupiter.api.extension.ParameterContext
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.aggregator.AggregateWith
