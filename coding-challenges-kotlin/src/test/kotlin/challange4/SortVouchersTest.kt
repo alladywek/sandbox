@@ -63,6 +63,16 @@ class SortVouchersTest {
         val result = sortVouchers(data.input)
         checkResult(result, data.expected)
     }
+
+    @ParameterizedTest(name = "sortVouchers() sorts vouchers by all conditions")
+    @CsvSource(delimiter = '|', value = [
+        "190112:Available:aaaa,190112:Activated:bbbb,190111:Available:cccc,190110:Redeemed:dddd,190110:Expired:eeee,190111:Activated:ffff       | 190111:Activated:ffff,190111:Available:cccc,190112:Activated:bbbb,190112:Available:aaaa,190110:Redeemed:dddd,190110:Expired:eeee",
+        "190112:Available:aaaa,190112:Activated:bbbb,190111:Available:cccc,190110:Redeemed:dddd,190110:Redeemed:aaaa,190111:Activated:ffff,190111:Activated:aabb     | 190111:Activated:aabb,190111:Activated:ffff,190111:Available:cccc,190112:Activated:bbbb,190112:Available:aaaa,190110:Redeemed:aaaa,190110:Redeemed:dddd"
+    ])
+    fun test6(@CsvToVouchersData data: VouchersData) {
+        val result = sortVouchers(data.input)
+        checkResult(result, data.expected)
+    }
 }
 
 class VouchersDataAggregator : ArgumentsAggregator {

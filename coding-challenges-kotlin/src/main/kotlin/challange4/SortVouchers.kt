@@ -9,14 +9,17 @@ fun sortVouchers(vouchers: String): Result<ValidationError, String> {
             .partition { it.status.current }
     val sortedCurrent = current.sortedWith(compareBy(
             { it.endDate },
-            { it.status }
+            { it.status },
+            { it.id }
     )).joinToString(",")
     val sortedNotCurrent = notCurrent.sortedWith(
             compareByDescending<Voucher> { it.endDate }
                     .thenBy { it.status }
+                    .thenBy { it.id }
     ).joinToString(",")
+    val delimiter = if (sortedCurrent.isEmpty().and(sortedNotCurrent.isEmpty())) "" else ","
 
-    return Result.Success("$sortedCurrent$sortedNotCurrent")
+    return Result.Success("$sortedCurrent$delimiter$sortedNotCurrent")
 }
 
 private fun String.buildVoucherFromString(): Voucher {
