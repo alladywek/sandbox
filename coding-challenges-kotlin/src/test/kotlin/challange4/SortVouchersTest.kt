@@ -25,10 +25,7 @@ class SortVouchersTest {
     ])
     fun test1(@CsvToVouchersData data: VouchersData) {
         val result = sortVouchers(data.input)
-        expectThat(result)
-                .isA<Success<String>>()
-                .get { value }
-                .isEqualTo(data.input)
+        checkResult(result, data.input)
     }
 
     @ParameterizedTest(name = "sortVouchers() returns validation error if input has no data")
@@ -52,10 +49,7 @@ class SortVouchersTest {
     ])
     fun test3(@CsvToVouchersData data: VouchersData) {
         val result = sortVouchers(data.input)
-        expectThat(result)
-                .isA<Success<String>>()
-                .get { value }
-                .isEqualTo(data.expected)
+        checkResult(result, data.expected)
     }
 
     @ParameterizedTest(name = "sortVouchers() sorts vouchers by endDate descending with Redeemed or Expired statuses")
@@ -67,10 +61,7 @@ class SortVouchersTest {
     ])
     fun test5(@CsvToVouchersData data: VouchersData) {
         val result = sortVouchers(data.input)
-        expectThat(result)
-                .isA<Success<String>>()
-                .get { value }
-                .isEqualTo(data.expected)
+        checkResult(result, data.expected)
     }
 }
 
@@ -88,3 +79,9 @@ class VouchersDataAggregator : ArgumentsAggregator {
     annotation class CsvToVouchersData
 }
 
+private fun checkResult(result: Result<ValidationError, String>, expected: String?) {
+    expectThat(result)
+            .isA<Success<String>>()
+            .get { value }
+            .isEqualTo(expected)
+}
