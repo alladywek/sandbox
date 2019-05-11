@@ -7,4 +7,4 @@ https://coding-challenges.jl-engineering.net/challenges/challenge-4/
 
 #### Run tests:
 
-./gradlew clean test
+./gradlew :cleanTest :test./gradlew :cleanTest :test
