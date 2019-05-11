@@ -21,7 +21,6 @@ class SortVouchersTest {
     @ParameterizedTest(name = "sortVouchers() returns the same result as input if input data is correct")
     @CsvSource(delimiter = '|', value = [
         "190111:Activated:ffff,190111:Available:cccc,190112:Activated:bbbb,190112:Available:aaaa",
-        "190111:Activated:ffff,190111:Available:cccc,190112:Activated:bbbb,190112:Available:aaaa,190110:Redeemed:dddd,190110:Expired:eeee",
         "190111:Available:cccc"
     ])
     fun test1(@CsvToVouchersData data: VouchersData) {
@@ -46,7 +45,7 @@ class SortVouchersTest {
     @CsvSource(delimiter = '|', value = [
         "190111:Activated:aaaa,190110:Activated:bbbb | 190110:Activated:bbbb,190111:Activated:aaaa",
         "200101:Activated:aaaa,191231:Activated:bbbb | 191231:Activated:bbbb,200101:Activated:aaaa",
-        "191010:Activated:aaaa,191009:Activated:bbbb,190908:Activated:cccc | 190908:Activated:cccc,191009:Activated:bbbb,191010:Activated:aaaaa"
+        "191010:Activated:aaaa,191009:Activated:bbbb,190908:Activated:cccc | 190908:Activated:cccc,191009:Activated:bbbb,191010:Activated:aaaa"
     ])
     fun test3(@CsvToVouchersData data: VouchersData) {
         val result = sortVouchers(data.input)
