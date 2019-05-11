@@ -57,7 +57,9 @@ class SortVouchersTest {
 
     @ParameterizedTest(name = "sortVouchers() sorts vouchers by endDate ascending for current rewards(Activated and Available)")
     @CsvSource(delimiter = '|', value = [
-        "190110:Available:aaaa,190110:Activated:bbbb | 190110:Activated:bbbb,190110:Available:aaaa"
+        "190110:Available:aaaa,190110:Activated:bbbb | 190110:Activated:bbbb,190110:Available:aaaa",
+        "190109:Available:aaaa,190110:Activated:bbbb | 190109:Available:aaaa,190110:Activated:bbbb",
+        "190109:Available:aaaa,190110:Available:bbbb,190110:Activated:cccc,190109:Activated:dddd | 190109:Activated:dddd,190109:Available:aaaa,190110:Activated:cccc,190110:Available:bbbb"
     ])
     fun test4(@CsvToVouchersData data: VouchersData) {
         val result = sortVouchers(data.input)
