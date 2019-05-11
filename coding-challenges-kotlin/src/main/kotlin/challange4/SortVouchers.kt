@@ -17,9 +17,7 @@ private fun String.buildVoucherFromString(): Voucher {
 }
 
 private class Voucher(val date: Long, val status: String, val id: String) {
-    override fun toString(): String {
-        return "$date:$status:$id"
-    }
+    override fun toString(): String = "$date:$status:$id"
 }
 
 sealed class Result<out E, out V> {
