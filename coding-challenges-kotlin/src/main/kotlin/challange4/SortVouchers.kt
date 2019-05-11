@@ -3,24 +3,36 @@ package challange4
 fun sortVouchers(vouchers: String): Result<ValidationError, String> {
     if (vouchers.isBlank())
         return Result.Error(ValidationError.VouchersStringIsBlankOrEmpty())
-    val sortedVouchers = vouchers
+    val (current, notCurrent) = vouchers
             .split(",")
             .map(String::buildVoucherFromString)
-            .sortedWith(compareBy(
-                    { it.endDate },
-                    { it.status }
-            ))
-            .joinToString(",")
-    return Result.Success(sortedVouchers)
+            .partition { it.status.current }
+    val sortedCurrent = current.sortedWith(compareBy(
+            { it.endDate },
+            { it.status }
+    )).joinToString(",")
+    val sortedNotCurrent = notCurrent.sortedWith(
+            compareByDescending<Voucher> { it.endDate }
+                    .thenBy { it.status }
+    ).joinToString(",")
+
+    return Result.Success("$sortedCurrent$sortedNotCurrent")
 }
 
 private fun String.buildVoucherFromString(): Voucher {
     val (date, status, id) = this.split(":")
-    return Voucher(date.toLong(), status, id)
+    return Voucher(date.toLong(), Status.valueOf(status), id)
 }
 
-private class Voucher(val endDate: Long, val status: String, val id: String) {
+private class Voucher(val endDate: Long, val status: Status, val id: String) {
     override fun toString(): String = "$endDate:$status:$id"
+}
+
+enum class Status(val current: Boolean) {
+    Activated(true),
+    Available(true),
+    Redeemed(false),
+    Expired(false),
 }
 
 sealed class Result<out E, out V> {

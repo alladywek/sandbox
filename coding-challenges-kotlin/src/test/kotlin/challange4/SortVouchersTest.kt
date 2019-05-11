@@ -41,11 +41,14 @@ class SortVouchersTest {
                 .isA<ValidationError.VouchersStringIsBlankOrEmpty>()
     }
 
-    @ParameterizedTest(name = "sortVouchers() sorts vouchers by endDate ascending for current rewards(only Activated)")
+    @ParameterizedTest(name = "sortVouchers() sorts vouchers by endDate ascending with Activated or Available statuses")
     @CsvSource(delimiter = '|', value = [
-        "190111:Activated:aaaa,190110:Activated:bbbb | 190110:Activated:bbbb,190111:Activated:aaaa",
-        "200101:Activated:aaaa,191231:Activated:bbbb | 191231:Activated:bbbb,200101:Activated:aaaa",
-        "191010:Activated:aaaa,191009:Activated:bbbb,190908:Activated:cccc | 190908:Activated:cccc,191009:Activated:bbbb,191010:Activated:aaaa"
+        "190111:Activated:aaaa,190110:Activated:bbbb                                                | 190110:Activated:bbbb,190111:Activated:aaaa",
+        "200101:Activated:aaaa,191231:Activated:bbbb                                                | 191231:Activated:bbbb,200101:Activated:aaaa",
+        "191010:Activated:aaaa,191009:Activated:bbbb,190908:Activated:cccc                          | 190908:Activated:cccc,191009:Activated:bbbb,191010:Activated:aaaa",
+        "190110:Available:aaaa,190110:Activated:bbbb                                                | 190110:Activated:bbbb,190110:Available:aaaa",
+        "190109:Available:aaaa,190110:Activated:bbbb                                                | 190109:Available:aaaa,190110:Activated:bbbb",
+        "190109:Available:aaaa,190110:Available:bbbb,190110:Activated:cccc,190109:Activated:dddd    | 190109:Activated:dddd,190109:Available:aaaa,190110:Activated:cccc,190110:Available:bbbb"
     ])
     fun test3(@CsvToVouchersData data: VouchersData) {
         val result = sortVouchers(data.input)
@@ -55,13 +58,14 @@ class SortVouchersTest {
                 .isEqualTo(data.expected)
     }
 
-    @ParameterizedTest(name = "sortVouchers() sorts vouchers by endDate ascending for current rewards(Activated and Available)")
+    @ParameterizedTest(name = "sortVouchers() sorts vouchers by endDate descending with Redeemed or Expired statuses")
     @CsvSource(delimiter = '|', value = [
-        "190110:Available:aaaa,190110:Activated:bbbb | 190110:Activated:bbbb,190110:Available:aaaa",
-        "190109:Available:aaaa,190110:Activated:bbbb | 190109:Available:aaaa,190110:Activated:bbbb",
-        "190109:Available:aaaa,190110:Available:bbbb,190110:Activated:cccc,190109:Activated:dddd | 190109:Activated:dddd,190109:Available:aaaa,190110:Activated:cccc,190110:Available:bbbb"
+        "190110:Redeemed:aaaa,190111:Redeemed:bbbb                          | 190111:Redeemed:bbbb,190110:Redeemed:aaaa",
+        "190111:Redeemed:aaaa,190110:Redeemed:bbbb                          | 190111:Redeemed:aaaa,190110:Redeemed:bbbb",
+        "190108:Redeemed:aaaa,190111:Redeemed:bbbb,190110:Redeemed:cccc     | 190111:Redeemed:bbbb,190110:Redeemed:cccc,190108:Redeemed:aaaa",
+        "190108:Redeemed:aaaa,190111:Expired:bbbb,190110:Expired:cccc       | 190111:Expired:bbbb,190110:Expired:cccc,190108:Redeemed:aaaa"
     ])
-    fun test4(@CsvToVouchersData data: VouchersData) {
+    fun test5(@CsvToVouchersData data: VouchersData) {
         val result = sortVouchers(data.input)
         expectThat(result)
                 .isA<Success<String>>()
