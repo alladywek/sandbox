@@ -1,18 +1,14 @@
 package challenge4
 
-import challenge4.Result.Error
-import challenge4.Result.Success
-import challenge4.VouchersDataAggregator.CsvToVouchersData
-import challenge4.VouchersDataAggregator.VouchersData
+import challenge4.TestDataAggregator.CsvToTestData
+import challenge4.TestDataAggregator.TestData
 import org.junit.jupiter.api.extension.ParameterContext
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.aggregator.AggregateWith
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor
 import org.junit.jupiter.params.aggregator.ArgumentsAggregator
 import org.junit.jupiter.params.provider.CsvSource
-import org.junit.jupiter.params.provider.ValueSource
 import strikt.api.expectThat
-import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 
 
@@ -23,19 +19,9 @@ class SortVouchersTest {
         "190111:Activated:ffff,190111:Available:cccc,190112:Activated:bbbb,190112:Available:aaaa",
         "190111:Available:cccc"
     ])
-    fun test1(@CsvToVouchersData data: VouchersData) {
+    fun test1(@CsvToTestData data: TestData) {
         val result = sortVouchers(data.input)
-        checkResult(result, data.input)
-    }
-
-    @ParameterizedTest(name = "sortVouchers() returns validation error if input has no data")
-    @ValueSource(strings = ["", " ", "   ", "\t", "\n"])
-    fun test2(input: String) {
-        val result = sortVouchers(input)
-        expectThat(result)
-                .isA<Error<ValidationError>>()
-                .get { value }
-                .isA<ValidationError.VouchersStringIsBlankOrEmpty>()
+        expectThat(result).isEqualTo(data.input)
     }
 
     @ParameterizedTest(name = "sortVouchers() sorts vouchers by endDate ascending with Activated or Available statuses")
@@ -47,9 +33,9 @@ class SortVouchersTest {
         "190109:Available:aaaa,190110:Activated:bbbb                                                | 190109:Available:aaaa,190110:Activated:bbbb",
         "190109:Available:aaaa,190110:Available:bbbb,190110:Activated:cccc,190109:Activated:dddd    | 190109:Activated:dddd,190109:Available:aaaa,190110:Activated:cccc,190110:Available:bbbb"
     ])
-    fun test3(@CsvToVouchersData data: VouchersData) {
+    fun test3(@CsvToTestData data: TestData) {
         val result = sortVouchers(data.input)
-        checkResult(result, data.expected)
+        expectThat(result).isEqualTo(data.expected)
     }
 
     @ParameterizedTest(name = "sortVouchers() sorts vouchers by endDate descending with Redeemed or Expired statuses")
@@ -59,9 +45,9 @@ class SortVouchersTest {
         "190108:Redeemed:aaaa,190111:Redeemed:bbbb,190110:Redeemed:cccc     | 190111:Redeemed:bbbb,190110:Redeemed:cccc,190108:Redeemed:aaaa",
         "190108:Redeemed:aaaa,190111:Expired:bbbb,190110:Expired:cccc       | 190111:Expired:bbbb,190110:Expired:cccc,190108:Redeemed:aaaa"
     ])
-    fun test5(@CsvToVouchersData data: VouchersData) {
+    fun test5(@CsvToTestData data: TestData) {
         val result = sortVouchers(data.input)
-        checkResult(result, data.expected)
+        expectThat(result).isEqualTo(data.expected)
     }
 
     @ParameterizedTest(name = "sortVouchers() sorts vouchers by all conditions")
@@ -69,29 +55,22 @@ class SortVouchersTest {
         "190112:Available:aaaa,190112:Activated:bbbb,190111:Available:cccc,190110:Redeemed:dddd,190110:Expired:eeee,190111:Activated:ffff       | 190111:Activated:ffff,190111:Available:cccc,190112:Activated:bbbb,190112:Available:aaaa,190110:Redeemed:dddd,190110:Expired:eeee",
         "190112:Available:aaaa,190112:Activated:bbbb,190111:Available:cccc,190110:Redeemed:dddd,190110:Redeemed:aaaa,190111:Activated:ffff,190111:Activated:aabb     | 190111:Activated:aabb,190111:Activated:ffff,190111:Available:cccc,190112:Activated:bbbb,190112:Available:aaaa,190110:Redeemed:aaaa,190110:Redeemed:dddd"
     ])
-    fun test6(@CsvToVouchersData data: VouchersData) {
+    fun test6(@CsvToTestData data: TestData) {
         val result = sortVouchers(data.input)
-        checkResult(result, data.expected)
+        expectThat(result).isEqualTo(data.expected)
     }
 }
 
-class VouchersDataAggregator : ArgumentsAggregator {
-    override fun aggregateArguments(arguments: ArgumentsAccessor, context: ParameterContext): VouchersData {
+class TestDataAggregator : ArgumentsAggregator {
+    override fun aggregateArguments(arguments: ArgumentsAccessor, context: ParameterContext): TestData {
         val expected = if (arguments.size() > 1) arguments.getString(1) else null
-        return VouchersData(arguments.getString(0), expected)
+        return TestData(arguments.getString(0), expected)
     }
 
-    data class VouchersData(val input: String, val expected: String?)
+    data class TestData(val input: String, val expected: String?)
 
     @Retention(AnnotationRetention.RUNTIME)
     @Target(AnnotationTarget.VALUE_PARAMETER)
-    @AggregateWith(VouchersDataAggregator::class)
-    annotation class CsvToVouchersData
-}
-
-private fun checkResult(result: Result<ValidationError, String>, expected: String?) {
-    expectThat(result)
-            .isA<Success<String>>()
-            .get { value }
-            .isEqualTo(expected)
+    @AggregateWith(TestDataAggregator::class)
+    annotation class CsvToTestData
 }

@@ -1,25 +1,22 @@
 package challenge4
 
-fun sortVouchers(vouchers: String): Result<ValidationError, String> {
-    if (vouchers.isBlank())
-        return Result.Error(ValidationError.VouchersStringIsBlankOrEmpty())
+fun sortVouchers(vouchers: String): String {
     val (current, other) = vouchers
             .split(",")
-            .map(String::buildVoucherFromString)
+            .map(String::buildVoucher)
             .partition { it.status.current }
     val sortedCurrent = current.sortedWith(compareBy({ it.endDate }, { it.status }, { it.id }))
     val sortedOther = other.sortedWith(
             compareByDescending<Voucher> { it.endDate }.thenComparing(compareBy({ it.status }, { it.id }))
     )
-    return Result.Success((sortedCurrent + sortedOther).joinToString(","))
+    return (sortedCurrent + sortedOther).joinToString(",")
 }
 
-private fun String.buildVoucherFromString(): Voucher {
-    val (date, status, id) = this.split(":")
-    return Voucher(date.toLong(), VoucherStatus.valueOf(status), id)
+private fun String.buildVoucher(): Voucher {
+    return this.split(":").run { Voucher(get(0), VoucherStatus.valueOf(get(1)), get(2)) }
 }
 
-private class Voucher(val endDate: Long, val status: VoucherStatus, val id: String) {
+private class Voucher(val endDate: String, val status: VoucherStatus, val id: String) {
     override fun toString(): String = "$endDate:$status:$id"
 }
 
@@ -28,13 +25,4 @@ private enum class VoucherStatus(val current: Boolean) {
     Available(true),
     Redeemed(false),
     Expired(false),
-}
-
-sealed class Result<out E, out V> {
-    data class Success<out V>(val value: V) : Result<Nothing, V>()
-    data class Error<out E>(val value: E) : Result<E, Nothing>()
-}
-
-sealed class ValidationError : Exception() {
-    class VouchersStringIsBlankOrEmpty : ValidationError()
 }
