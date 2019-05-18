@@ -1,49 +1,89 @@
 package challenge5
 
-import challenge5.TestDataAggregator.CsvToTestData
-import challenge5.TestDataAggregator.TestData
-import org.junit.jupiter.api.extension.ParameterContext
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.aggregator.AggregateWith
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor
-import org.junit.jupiter.params.aggregator.ArgumentsAggregator
-import org.junit.jupiter.params.provider.CsvSource
-import strikt.api.expectThat
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
+import strikt.api.expect
 import strikt.assertions.isEqualTo
 
+class GravitripsTest {
 
-class SortVouchersTest {
+    @Test
+    @DisplayName("getGridStatus() should return correct status")
+    fun test1() {
+        expect {
+            testData.forEach { (inputFields, expectedStatus) ->
+                that(getGridStatus(inputFields)).isEqualTo(expectedStatus)
+            }
+        }
+    }
+}
 
-    @ParameterizedTest(name = "getGridStatus()")
-    @CsvSource(delimiter = '|', value = [
+private val regexFields = "\"[.RYry]+\"".toRegex()
+private val regexStatus = "'(.+)'".toRegex()
+val testData = arrayOf(
         """
-           '".......",
+            ".......",
             ".......",
             ".R.....",
             ".r.....",
             ".ry....",
-            ".ryyy.."' | 'Red wins'
+            ".ryyy.." | 'Red wins'
+        """,
         """
-    ])
-    fun test1(@CsvToTestData data: TestData) {
-        val result = getGridStatus(data.inputFields)
-        expectThat(result).isEqualTo(data.expectedStatus)
-    }
-}
-
-object TestDataAggregator : ArgumentsAggregator {
-    private val regex = "[.RYry]+".toRegex()
-
-    override fun aggregateArguments(arguments: ArgumentsAccessor, context: ParameterContext): TestData {
-        val fields = regex.findAll(arguments.getString(0)).map { it.value }.toList()
-        val status = arguments.getString(1)
-        return TestData(fields, status)
-    }
-
-    class TestData(val inputFields: List<String>, val expectedStatus: String)
-
-    @Retention(AnnotationRetention.RUNTIME)
-    @Target(AnnotationTarget.VALUE_PARAMETER)
-    @AggregateWith(TestDataAggregator::class)
-    annotation class CsvToTestData
-}
+            ".......",
+            ".......",
+            ".......",
+            ".yy....",
+            ".rrRr..",
+            ".ryyy.." | 'Red wins'
+        """,
+        """
+            ".......",
+            ".......",
+            "....r..",
+            "...ry..",
+            "..Ryr..",
+            ".ryyyr." | 'Red wins'
+        """,
+        """
+            ".......",
+            ".......",
+            "...y...",
+            "...ry..",
+            "...ryy.",
+            "...rrrY" | 'Yellow wins'
+        """,
+        """
+            ".......",
+            ".......",
+            ".......",
+            "...ry..",
+            "...ryy.",
+            "..yrrrY" | 'Red plays next'
+        """,
+        """
+            ".......",
+            ".......",
+            ".......",
+            "...ry..",
+            "..Rryy.",
+            "..yrrry" | 'Yellow plays next'
+        """,
+        """
+            "rrryyyr",
+            "yyyrrry",
+            "rrryyyr",
+            "yyyrrry",
+            "rrryyyr",
+            "yyyrrry" | 'Draw'
+        """,
+        """
+            "rrryyyr",
+            "yyyrrry",
+            "ryryyyr",
+            "yyyrrry",
+            "rrryyyr",
+            "yyyrYry" | 'Yellow wins'
+        """
+).map { regexFields.findAll(it).map { it.value.removeSurrounding("\"") }.toList() to
+        regexStatus.find(it)!!.value.removeSurrounding("'") }
