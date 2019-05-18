@@ -56,6 +56,22 @@ val testData = arrayOf(
         """
             ".......",
             ".......",
+            ".yyyY..",
+            "...ry..",
+            "...ryr.",
+            "...rrry" | 'Yellow wins'
+        """,
+        """
+            ".......",
+            ".......",
+            ".y..y..",
+            "...ry..",
+            "...ryy.",
+            "..Rrrry" | 'Red wins'
+        """,
+        """
+            ".......",
+            ".......",
             ".......",
             "...ry..",
             "...ryy.",
@@ -84,6 +100,14 @@ val testData = arrayOf(
             "yyyrrry",
             "rrryyyr",
             "yyyrYry" | 'Yellow wins'
+        """,
+        """
+            "rrrRyyr",
+            "yyyrrry",
+            "ryryyyr",
+            "yyyrrry",
+            "rrryyyr",
+            "yyyrrry" | 'Red wins'
         """
 ).map { regexFields.findAll(it).map { it.value.removeSurrounding("\"") }.toList() to
         regexStatus.find(it)!!.value.removeSurrounding("'") }

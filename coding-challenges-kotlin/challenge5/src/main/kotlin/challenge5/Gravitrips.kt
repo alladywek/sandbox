@@ -16,7 +16,7 @@ fun getGridStatus(fields: List<String>): String {
             .status
 }
 
-fun translateToMatrix(fields: List<String>): Result {
+private fun translateToMatrix(fields: List<String>): Result {
     val matrix = Matrix(fields.size, fields.first().length)
     fields.forEachIndexed { row, line ->
         line.forEachIndexed { column, char ->
@@ -38,17 +38,32 @@ private fun Result.checkDrawResult(): Result {
 
 private fun Result.checkWinnerByHorizontal(): Result {
     if (statusDetermined) return this
-    return this
+    val variants = matrix.rows().flatMap { row -> row.windowed(4) }
+    return when {
+        variants.any { it.sum() == 41 } -> Result(matrix, "Red wins")
+        variants.any { it.sum() == 401 } -> Result(matrix, "Yellow wins")
+        else -> this
+    }
 }
 
 private fun Result.checkWinnerByVertical(): Result {
     if (statusDetermined) return this
-    return this
+    val variants = matrix.columns().flatMap { column -> column.windowed(4) }
+    return when {
+        variants.any { it.sum() == 41 } -> Result(matrix, "Red wins")
+        variants.any { it.sum() == 401 } -> Result(matrix, "Yellow wins")
+        else -> this
+    }
 }
 
 private fun Result.checkWinnerByDiagonal(): Result {
     if (statusDetermined) return this
-    return this
+    val variants = matrix.diagonals().flatMap { diagonal -> diagonal.windowed(4) }
+    return when {
+        variants.any { it.sum() == 41 } -> Result(matrix, "Red wins")
+        variants.any { it.sum() == 401 } -> Result(matrix, "Yellow wins")
+        else -> this
+    }
 }
 
 private fun Result.checkWhoNext(): Result = when {
@@ -57,18 +72,47 @@ private fun Result.checkWhoNext(): Result = when {
     else -> Result(matrix, "Red plays next")
 }
 
-class Result(val matrix: Matrix, val status: String = "") {
+private class Result(val matrix: Matrix, val status: String = "") {
     val statusDetermined: Boolean = status.isNotEmpty()
 }
 
-class Matrix(private val rows: Int, private val columns: Int) {
+private class Matrix(private val rows: Int, private val columns: Int) {
     private val src: Array<Int> = Array(rows * columns) { NOTHING.value }
-    operator fun get(row: Int, column: Int): Int = src[columns * row + column]
-    operator fun set(row: Int, column: Int, value: Int) = src.set(columns * row + column, value)
+    private val srcTransparent: Array<Int> = Array(rows * columns) { NOTHING.value }
+    operator fun Array<Int>.get(row: Int, column: Int): Int = this[columns * row + column]
+    operator fun set(row: Int, column: Int, value: Int) {
+        src[columns * row + column] = value
+        srcTransparent[rows * column + row] = value
+    }
+
     operator fun contains(value: Int): Boolean = value in src
+    fun rows(): List<List<Int>> = src.toList().windowed(columns, columns)
+    fun columns(): List<List<Int>> = srcTransparent.toList().windowed(rows, rows)
+    fun diagonals(): List<List<Int>> {
+        val diagonalsH = columns - 4
+        val diagonalsR = rows - 4
+        val result = mutableListOf<List<Int>>()
+        (0..diagonalsH).forEach { column ->
+            (0..diagonalsR).forEach { row ->
+                result.add(listOf(
+                        src[row, column],
+                        src[row + 1, column + 1],
+                        src[row + 2, column + 2],
+                        src[row + 3, column + 3]
+                ))
+                result.add(listOf(
+                        src[row, column + 3],
+                        src[row + 1, column + 2],
+                        src[row + 2, column + 1],
+                        src[row + 3, column]
+                ))
+            }
+        }
+        return result
+    }
 }
 
-enum class Values(val value: Int) {
+private enum class Values(val value: Int) {
     NOTHING(0),
     RED(10),
     RED_LAST(11),
