@@ -1,6 +1,6 @@
 package challenge5
 
-typealias Grid = List<List<Char>>
+private typealias Grid = List<List<Char>>
 
 fun getGridStatus(fields: List<String>): String {
     val grid = fields.map(String::toList)
@@ -8,8 +8,8 @@ fun getGridStatus(fields: List<String>): String {
         grid.containsOnly('.') -> "Red plays next"
         grid.hasSequenceOf(4, listOf('r', 'R')) -> "Red wins"
         grid.hasSequenceOf(4, listOf('y', 'Y')) -> "Yellow wins"
-        'R' in grid -> "Yellow plays next"
-        'Y' in grid -> "Red plays next"
+        'R' in grid && '.' in grid -> "Yellow plays next"
+        'Y' in grid && '.' in grid -> "Red plays next"
         else -> "Draw"
     }
 }

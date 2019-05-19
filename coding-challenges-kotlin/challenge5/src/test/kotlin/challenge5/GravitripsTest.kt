@@ -130,7 +130,7 @@ class GravitripsTest {
                         "rrryyyr",
                         "yyyrrry",
                         "rrryyyr",
-                        "yyyrrry")
+                        "yyyrrrY")
         )
         expect {
             that(getGridStatus(inputFields[0])).isEqualTo("Draw")
