@@ -24,11 +24,11 @@ Example:
 `String = "190112:Activated:aaaa,190205:Redeemed:bbbb,..."`
 
 
-#####For ‘current’ rewards (that is where status = `Available` or `Activated`)
+##### For ‘current’ rewards (that is where status = `Available` or `Activated`)
 
 Sort by endDate ascending, then by status = Activated, then by status = Available, then by id ascending
 
-#####For redeemed/expired rewards (that is where status = `Redeemed` or `Expired`)
+##### For redeemed/expired rewards (that is where status = `Redeemed` or `Expired`)
 
 Sort by endDate descending, then by status = Redeemed, then by status = Expired, then by id ascending
 
