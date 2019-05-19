@@ -1,7 +1,9 @@
 package challenge5
 
+typealias Grid = List<List<Char>>
+
 fun getGridStatus(fields: List<String>): String {
-    val grid = Grid(fields.map(String::toList))
+    val grid = fields.map(String::toList)
     return when {
         grid.containsOnly('.') -> "Red plays next"
         grid.hasSequenceOf(4, listOf('r', 'R')) -> "Red wins"
@@ -12,16 +14,13 @@ fun getGridStatus(fields: List<String>): String {
     }
 }
 
-private fun Grid.hasSequenceOf(length: Int, Chars: List<Char>): Boolean {
-    val hasSequence: (List<Char>) -> Boolean = { chars -> chars.windowed(length).any { it.all(Chars::contains) } }
+private fun Grid.hasSequenceOf(length: Int, chars: List<Char>): Boolean {
+    val hasSequence = { line: List<Char> -> line.windowed(length).any { it.all(chars::contains) } }
     return (rows + columns + diagonalsWithLength(length)).any(hasSequence)
 }
 
-private class Grid(val rows: List<List<Char>>) {
-
-    val columns: List<List<Char>> = 0.until(rows[0].size).map { columnIndex -> rows.map { it[columnIndex] } }
-}
-
+private val Grid.rows get() = this
+private val Grid.columns get() = 0.until(rows[0].size).map { columnIndex -> rows.map { it[columnIndex] } }
 private fun Grid.containsOnly(char: Char): Boolean = rows.all { row -> row.all { it == char } }
 private operator fun Grid.contains(char: Char): Boolean = rows.any { row -> row.any { it == char } }
 
