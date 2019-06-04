@@ -1,1 +1,1 @@
-rootProject.name = "coding-challenges-kotlin"
+rootProject.name = "challenge4"
