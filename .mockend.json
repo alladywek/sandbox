@@ -1,29 +1,31 @@
 {
-  "Post": {
-    "title": { "string": {} },
-    "body": { "string": {} },
-    "comments": {
-      "hasMany": "Comment"
+    "Post": {
+        "title": { "string": {} },
+        "body": { "string": {} },
+        "comments": {
+            "hasMany": "Comment"
+        },
+        "author": {
+            "belongsTo": "User"
+        }
     },
-    "author": {
-      "belongsTo": "User"
+    "Comment": {
+        "body": { "string": {} },
+        "createdAt": {
+            "dateTime": {
+                "min": "2010-01-01T00:00:00Z",
+                "max": "2020-12-31T23:59:59Z"
+            }
+        },
+        "post": {
+            "belongsTo": "Post"
+        },
+        "user": {
+            "belongsTo": "User"
+        }
+    },
+    "User": {
+        "name": { "string": [ "Mike", "Alex", "Lisa", "Olya", "Kolya" ] },
+        "age": { "int": { "min": 18, "max": 100 } }
     }
-  },
-  "Comment": {
-    "body": { "string": {} },
-    "createdAt": {
-      "min": "2010-01-01T00:00:00Z",
-      "max": "2020-12-31T23:59:59Z"
-    },
-    "post": {
-      "belongsTo": "Post"
-    },
-    "user": {
-      "belongsTo": "User"
-    }
-  },
-  "User": {
-    "name": { "string": [ "Mike", "Alex", "Lisa", "Olya", "Kolya" ] },
-    "age": { "int": { "min": 18, "max": 100 } }
-  }
 }
