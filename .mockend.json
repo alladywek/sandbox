@@ -4,9 +4,6 @@
         "body": { "string": {} },
         "comments": {
             "hasMany": "Comment"
-        },
-        "author": {
-            "belongsTo": "User"
         }
     },
     "Comment": {
